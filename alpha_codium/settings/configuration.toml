@@ -1,11 +1,17 @@
 [config]
-model="gpt-4-0613"
-#model = "gpt-3.5-turbo-16k"
+# Google Gemini models
+#model="gemini-2.0-pro"
+model="gemini-2.0-flash"
+
 ai_timeout=90 # seconds
 fallback_models =[]
 verbosity_level=0 # 0,1,2
 private_dataset_cache_dir="~/.cache/huggingface/datasets/alpha_codium"
 max_requests_per_minute=60
+
+[dataset_adapter]
+# Options: 'code_contests', 'custom_json', 'auto'
+format="auto"
 
 
 [dataset]
@@ -19,7 +25,7 @@ use_baseline = false
 use_direct_solutions=false
 
 [self_reflection]
-validate_self_reflection=false
+validate_self_reflection=true
 
 [possible_solutions]
 max_num_of_possible_solutions=3
@@ -27,7 +33,7 @@ use_test_explanations=true
 remove_bruce_force_solutions=true
 
 [generate_ai_tests]
-validate_ai_tests=false
+validate_ai_tests=true
 number_of_ai_tests=6
 use_test_explanations=true
 add_public_tests_to_ai_tests=true
@@ -38,9 +44,9 @@ max_attempts=8
 [public_tests]
 max_allowed_calls=4
 max_fixes_per_test=3
-use_test_explanations=false
+use_test_explanations=true
 single_stage_fix=true
-use_self_reflection=false
+use_self_reflection=true
 
 [ai_tests]
 max_allowed_calls=4
@@ -51,8 +57,8 @@ order_matters=true
 sandbox=true
 delta=0.0001
 # trace
-calc_trace=false
-use_trace=false
+calc_trace=true
+use_trace=true
 max_trace_lines=50
 trace_depth=4
 

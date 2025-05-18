@@ -1,0 +1,54 @@
+{
+  "test": [
+    {
+      "name": "custom_problem_1",
+      "description": "Write a function that calculates the factorial of a number.\n\nInput:\nA single integer n (0 <= n <= 20).\n\nOutput:\nThe factorial of n (n!).",
+      "public_tests": {
+        "input": ["5", "0", "1", "10"],
+        "output": ["120", "1", "1", "3628800"]
+      },
+      "private_tests": {
+        "input": ["12", "15", "20"],
+        "output": ["479001600", "1307674368000", "2432902008176640000"]
+      },
+      "solutions": {
+        "language": ["python"],
+        "solution": ["def factorial(n):\n    if n == 0 or n == 1:\n        return 1\n    else:\n        return n * factorial(n-1)\n\nn = int(input())\nprint(factorial(n))"]
+      }
+    },
+    {
+      "name": "custom_problem_2",
+      "description": "Write a function that checks if a string is a palindrome.\n\nInput:\nA single string s (1 <= len(s) <= 100).\n\nOutput:\n'Yes' if the string is a palindrome, 'No' otherwise.",
+      "public_tests": {
+        "input": ["racecar", "hello", "level", "a"],
+        "output": ["Yes", "No", "Yes", "Yes"]
+      },
+      "private_tests": {
+        "input": ["madam", "python", "12321", "abcba"],
+        "output": ["Yes", "No", "Yes", "Yes"]
+      },
+      "solutions": {
+        "language": ["python"],
+        "solution": ["s = input()\nif s == s[::-1]:\n    print('Yes')\nelse:\n    print('No')"]
+      }
+    }
+  ],
+  "valid": [
+    {
+      "name": "custom_problem_3",
+      "description": "Write a function that finds the sum of all even numbers in a list.\n\nInput:\nThe first line contains an integer n (1 <= n <= 100), the number of elements in the list.\nThe second line contains n space-separated integers (-1000 <= a_i <= 1000).\n\nOutput:\nThe sum of all even numbers in the list.",
+      "public_tests": {
+        "input": ["5\n1 2 3 4 5", "3\n2 4 6", "4\n1 3 5 7"],
+        "output": ["6", "12", "0"]
+      },
+      "private_tests": {
+        "input": ["6\n2 4 6 8 10 12", "5\n-2 -4 -6 -8 -10"],
+        "output": ["42", "-30"]
+      },
+      "solutions": {
+        "language": ["python"],
+        "solution": ["n = int(input())\nnumbers = list(map(int, input().split()))\neven_sum = sum(num for num in numbers if num % 2 == 0)\nprint(even_sum)"]
+      }
+    }
+  ]
+}

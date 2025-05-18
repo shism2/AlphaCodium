@@ -43,11 +43,22 @@ Many of the principles and best practices we acquired in this work, we believe, 
 
 (1) setup a virtual environment and run: `pip install -r requirements.txt`
 
-(2) Duplicate the file `alpha_codium/settings/.secrets_template.toml`, rename it as `.secrets.toml`, and fill in your OpenAI API key:
+(2) Duplicate the file `alpha_codium/settings/.secrets_template.toml`, rename it as `.secrets.toml`, and fill in your API key:
+
 ```
-[openai]
-key = "..."
+[gemini]
+key = "your-gemini-api-key"
 ```
+
+### Model Support
+
+AlphaCodium supports Google Gemini models:
+
+- **Google Gemini Models**: Gemini 1.5 Pro, Gemini 1.5 Flash, Gemini 2.0 Pro, Gemini 2.0 Flash
+
+For Gemini setup instructions, see [GEMINI_INTEGRATION.md](GEMINI_INTEGRATION.md).
+
+You can also use the setup script for Gemini: `python setup_gemini.py`
 
 (3) Download the processed CodeContest validation and test dataset from [hugging face](https://huggingface.co/datasets/talrid/CodeContests_valid_and_test_AlphaCodium/blob/main/codecontests_valid_and_test_processed_alpha_codium.zip), extract the zip file, and placed the extracted folder in the root of the project.
 
@@ -55,7 +66,20 @@ key = "..."
 
 ### Configuration
 The file: `alpha_codium/settings/configuration.toml` contains the configuration for the project.
-In the `config` section you can choose the model you want to use ("gpt-4", "gpt-3.5-turbo-16k", or others).
+In the `config` section you can choose the model you want to use:
+
+#### Supported Models
+- **Google Gemini models**: "gemini-1.5-pro", "gemini-1.5-flash", "gemini-2.0-pro", "gemini-2.0-flash"
+
+#### API Keys
+To use these models, you need to provide the appropriate API key in the `alpha_codium/settings/.secrets.toml` file:
+
+```toml
+[gemini]
+key = "your-gemini-api-key"  # Required for Google Gemini models
+```
+
+You can copy the template from `alpha_codium/settings/.secrets_template.toml` to get started.
 
 ### Solving a specific problem
 To solve a specific problem with AlphaCodium, from the root folder run:
@@ -72,6 +96,9 @@ python -m alpha_codium.solve_problem \
 `solve`, `self_reflection`,`possible_solutions`,`generate_ai_tests`,`initial_code_generation`,`public_tests`, `ai_tests`  
 enable to adjust possible configurations for the different stages of the flow.
 - Each run logs the results to a file named `alpha_codium/example.log`. Reviewing the log file is a good way to understand what is going on in each stage of the flow.
+
+### Using Custom Datasets
+AlphaCodium now supports custom datasets in JSON format. See [CUSTOM_DATASETS.md](CUSTOM_DATASETS.md) for details on how to use your own datasets with AlphaCodium.
 
 Example problem (test set, problem number 12):
 <p align="center">
@@ -116,8 +143,7 @@ We estimate that ~95% of the time we did more high-level design, reasoning, and 
 ___
 
 **Q: How do you know that there wasn't a data leakage?** <br><br>
-**A:** The test set of CodeContests dataset comprises problems published after September 2021, while the GPT-4 model variant we used (gpt-4-0613) has a data cutoff of September 2021. Hence, there is no data leakage for GPT4, on the test set.
-For other models like DeepSeek, we cannot be sure. However, note that our [main result](./pics/comparison.png) is a comparison of "direct prompt" vs. "AlphaCodium flow". Data leakage would help both approaches, so the relative improvement of AlphaCodium flow is still valid.
+**A:** The test set of CodeContests dataset comprises problems published after September 2021, while the models we use have data cutoffs around that time. However, note that our [main result](./pics/comparison.png) is a comparison of "direct prompt" vs. "AlphaCodium flow". Data leakage would help both approaches, so the relative improvement of AlphaCodium flow is still valid.
 ___
 
 **Q: Is this project relevant only to specific programming languages?**<br><br>

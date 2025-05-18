@@ -1,15 +1,6 @@
 from jinja2 import Environment, StrictUndefined
-from tiktoken import encoding_for_model, get_encoding
 
 from alpha_codium.settings.config_loader import get_settings
-
-
-def get_token_encoder():
-    return (
-        encoding_for_model(get_settings().config.model)
-        if "gpt" in get_settings().config.model
-        else get_encoding("cl100k_base")
-    )
 
 
 class TokenHandler:
@@ -17,10 +8,6 @@ class TokenHandler:
     A class for handling tokens in the context of a pull request.
 
     Attributes:
-    - encoder: An object of the encoding_for_model class from the tiktoken module. Used to encode strings and count the
-      number of tokens in them.
-    - limit: The maximum number of tokens allowed for the given model, as defined in the MAX_TOKENS dictionary in the
-      pr_agent.algo module.
     - prompt_tokens: The number of tokens in the system and user strings, as calculated by the _get_system_user_tokens
       method.
     """
@@ -30,24 +17,23 @@ class TokenHandler:
         Initializes the TokenHandler object.
 
         Args:
-        - pr: The pull request object.
+        - message: The message object.
         - vars: A dictionary of variables.
         - system: The system string.
         - user: The user string.
         """
-        self.encoder = get_token_encoder()
         if message is not None:
             self.prompt_tokens = self._get_system_user_tokens(
-                message, self.encoder, vars, system, user
+                message, vars, system, user
             )
 
-    def _get_system_user_tokens(self, message, encoder, vars: dict, system, user):
+    def _get_system_user_tokens(self, message, vars: dict, system, user):
         """
         Calculates the number of tokens in the system and user strings.
+        For Gemini, we use a simple character count approximation.
 
         Args:
-        - message: The pull request object.
-        - encoder: An object of the encoding_for_model class from the tiktoken module.
+        - message: The message object.
         - vars: A dictionary of variables.
         - system: The system string.
         - user: The user string.
@@ -58,13 +44,17 @@ class TokenHandler:
         environment = Environment(undefined=StrictUndefined)
         system_prompt = environment.from_string(system).render(vars)
         user_prompt = environment.from_string(user).render(vars)
-        system_prompt_tokens = len(encoder.encode(system_prompt))
-        user_prompt_tokens = len(encoder.encode(user_prompt))
+        
+        # Simple approximation: 1 token ≈ 4 characters
+        system_prompt_tokens = len(system_prompt) // 4
+        user_prompt_tokens = len(user_prompt) // 4
+        
         return system_prompt_tokens + user_prompt_tokens
 
     def count_tokens(self, patch: str) -> int:
         """
         Counts the number of tokens in a given patch string.
+        For Gemini, we use a simple character count approximation.
 
         Args:
         - patch: The patch string.
@@ -72,4 +62,5 @@ class TokenHandler:
         Returns:
         The number of tokens in the patch string.
         """
-        return len(self.encoder.encode(patch, disallowed_special=()))
+        # Simple approximation: 1 token ≈ 4 characters
+        return len(patch) // 4

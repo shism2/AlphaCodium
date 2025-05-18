@@ -12,12 +12,14 @@ from alpha_codium.settings.config_loader import get_settings
 
 def solve_dataset(dataset_name='valid_and_test_processed',
                   split_name='valid',
-                  database_solution_path='solution_database.json'):
+                  database_solution_path='solution_database.json',
+                  dataset_format='auto'):
 
     # load dataset
-    data_provider = CodeContestDataProvider(dataset_location=dataset_name)
+    from alpha_codium.data_adapters.data_provider import DataProvider
+    data_provider = DataProvider(dataset_location=dataset_name, dataset_format=dataset_format)
     setting = get_settings()
-    num_problems = len(data_provider.dataset[split_name])
+    num_problems = data_provider.get_problem_count(split_name)
     base_path = os.getcwd()
     setting.solve.reduce_verbose = True
 
@@ -43,16 +45,18 @@ def solve_dataset(dataset_name='valid_and_test_processed',
             continue
 
         # check if problem is valid (at least one of the provided solutions actually passes the generated tests)
-        if data_provider.dataset[split_name][problem_number].get('is_valid_problem', True) is False:
+        problem = data_provider.get_problem_by_index(split_name, problem_number)
+        if problem.get('is_valid_problem', True) is False:
             logger.info(f"problem {problem_number} is not valid")
             continue
 
         os.chdir(base_path)
         logger.info(f"problem_number: {problem_number}")
-        problem_name = data_provider.dataset[split_name][int(problem_number)]['name']
+        problem_name = problem['name']
         logger.info(f"problem_name: {problem_name}")
-        problem = data_provider.find_problem(ds=data_provider.dataset, problem_name=problem_name, split_name=split_name)
-        logger.info(f"problem['cf_tags']: {problem['cf_tags']}")
+        # We already have the problem, no need to find it again
+        if 'cf_tags' in problem:
+            logger.info(f"problem['cf_tags']: {problem['cf_tags']}")
 
         # solve problem
         problem_database = {problem_number: {}}

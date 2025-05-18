@@ -2,26 +2,27 @@ import argparse
 import json
 from collections import OrderedDict
 
-from alpha_codium.code_contests.data.provider import CodeContestDataProvider
+from alpha_codium.data_adapters.data_provider import DataProvider
 from alpha_codium.log import get_logger
 
 logger = get_logger(__name__)
 
 def evaluate_dataset_solution(dataset_name='valid_and_test_processed',
-                               split_name='test',
-                               solution_path_database='valid_database_solution.json'):
+                              dataset_format='auto',
+                              split_name='test',
+                              solution_path_database='valid_database_solution.json'):
     """
     Evaluate the performance of dataset solutions.
 
     Args:
         dataset_name (str, optional): The name of the dataset. Defaults to 'valid_and_test_processed'.
+        dataset_format (str, optional): Format of the dataset. Defaults to 'auto'.
         split_name (str, optional): The name of the split. Defaults to 'test'.
         solution_path_database (str, optional): The path to the solution database file. Defaults to 'valid_database_solution.json'.
     """
 
     # Load the dataset and solution database
-    data_provider = CodeContestDataProvider(dataset_location=dataset_name)
-    ds = data_provider.dataset[split_name]
+    data_provider = DataProvider(dataset_location=dataset_name, dataset_format=dataset_format)
     with open(solution_path_database, 'r') as f:
         database_solutions = json.load(f)
         database_solutions[split_name] = OrderedDict(
@@ -36,7 +37,7 @@ def evaluate_dataset_solution(dataset_name='valid_and_test_processed',
         try:
             key_str = sol
             key_int = int(key_str)
-            problem = ds[key_int]
+            problem = data_provider.get_problem_by_index(split_name, key_int)
             if problem.get('is_valid_problem', True) is False:
                 print(f"problem {key_int} is not valid")
                 continue
@@ -78,16 +79,25 @@ def evaluate_dataset_solution(dataset_name='valid_and_test_processed',
     print(f"total_passed: {total_passed}, total_failed: {total_failed}")
 
     # Calculate the pass rate
-    pass_rate = total_passed / (total_passed + total_failed)
-    print(f"pass rate: {pass_rate}")
+    if total_passed + total_failed > 0:
+        pass_rate = total_passed / (total_passed + total_failed)
+        print(f"pass rate: {pass_rate}")
+    else:
+        print("No valid problems were evaluated.")
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--dataset_name", type=str, default="valid_and_test_processed")
-parser.add_argument("--split_name", type=str, default="valid")
-parser.add_argument("--database_solution_path", type=str, default="./gpt_3_solution_database_valid.json")
+parser.add_argument("--dataset_name", type=str, default="valid_and_test_processed",
+                   help="Path to the dataset file or directory")
+parser.add_argument("--dataset_format", type=str, default="auto",
+                   help="Format of the dataset: 'code_contests', 'custom_json', or 'auto'")
+parser.add_argument("--split_name", type=str, default="valid",
+                   help="Name of the dataset split to use")
+parser.add_argument("--database_solution_path", type=str, default="./gemini_solution_database_valid.json",
+                   help="Path to the solution database file")
 
 if __name__ == "__main__":
     args = parser.parse_args()
     evaluate_dataset_solution(dataset_name=args.dataset_name,
+                              dataset_format=args.dataset_format,
                               split_name=args.split_name,
                               solution_path_database=args.database_solution_path)

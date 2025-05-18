@@ -1,0 +1,11 @@
+{
+    "name": "Fibonacci",
+    "description": "Write a function called fibonacci that takes a non-negative integer n as input and returns the nth Fibonacci number. The Fibonacci sequence starts with 0 and 1, and each subsequent number is the sum of the two preceding ones. For example, the sequence starts: 0, 1, 1, 2, 3, 5, 8, 13, 21, ...",
+    "public_tests": [
+        {"input": "0", "output": "0"},
+        {"input": "1", "output": "1"},
+        {"input": "2", "output": "1"},
+        {"input": "5", "output": "5"},
+        {"input": "10", "output": "55"}
+    ]
+}

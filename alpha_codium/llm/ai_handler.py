@@ -1,68 +1,55 @@
 import logging
-import os
-
-import litellm
-import openai
 from aiolimiter import AsyncLimiter
-from litellm import acompletion
-from litellm import RateLimitError
-from litellm.exceptions import APIError
-# from openai.error import APIError, RateLimitError, Timeout, TryAgain
 from retry import retry
 
 from alpha_codium.settings.config_loader import get_settings
 from alpha_codium.log import get_logger
+from alpha_codium.llm.gemini_handler import GeminiHandler
 
 logger = get_logger(__name__)
-OPENAI_RETRIES = 5
+GEMINI_RETRIES = 5
 
 
 class AiHandler:
     """
-    This class handles interactions with the OpenAI API for chat completions.
+    This class handles interactions with the Google Gemini API for chat completions.
     It initializes the API key and other settings from a configuration file,
-    and provides a method for performing chat completions using the OpenAI ChatCompletion API.
+    and provides a method for performing chat completions using the Gemini API.
     """
 
     def __init__(self):
         """
-        Initializes the OpenAI API key and other settings from a configuration file.
-        Raises a ValueError if the OpenAI key is missing.
+        Initializes the API keys and other settings from a configuration file.
+        Raises a ValueError if the required API key is missing.
         """
         self.limiter = AsyncLimiter(get_settings().config.max_requests_per_minute)
+        self.model_provider = self._get_model_provider()
+        
         try:
-            if "gpt" in get_settings().get("config.model").lower():
-                openai.api_key = get_settings().openai.key
-                litellm.openai_key = get_settings().openai.key
-            self.azure = False
-            if "deepseek" in get_settings().get("config.model"):
-                litellm.register_prompt_template(
-                    model="huggingface/deepseek-ai/deepseek-coder-33b-instruct",
-                    roles={
-                        "system": {
-                            "pre_message": "",
-                            "post_message": "\n"
-                        },
-                        "user": {
-                            "pre_message": "### Instruction:\n",
-                            "post_message": "\n### Response:\n"
-                        },
-                    },
-
-                )
+            if self.model_provider == "gemini":
+                self.gemini_handler = GeminiHandler()
+            else:
+                raise ValueError(f"Unsupported model provider: {self.model_provider}")
         except AttributeError as e:
-            raise ValueError("OpenAI key is required") from e
+            raise ValueError("Gemini API key is required") from e
 
-    @property
-    def deployment_id(self):
+    def _get_model_provider(self):
         """
-        Returns the deployment ID for the OpenAI API.
+        Determines the model provider based on the model name in the configuration.
+        
+        Returns:
+            The model provider name: 'gemini'
         """
-        return get_settings().get("OPENAI.DEPLOYMENT_ID", None)
+        model = get_settings().get("config.model").lower()
+        if "gemini" in model:
+            return "gemini"
+        else:
+            # Default to Gemini if model provider can't be determined
+            return "gemini"
 
     @retry(
-        exceptions=(AttributeError, RateLimitError),
-        tries=OPENAI_RETRIES,
+        exceptions=(Exception,),
+        tries=GEMINI_RETRIES,
         delay=2,
         backoff=2,
         jitter=(1, 3),
@@ -74,62 +61,27 @@ class AiHandler:
             temperature: float = 0.2,
             frequency_penalty: float = 0.0,
     ):
-        try:
-            deployment_id = self.deployment_id
-            if get_settings().config.verbosity_level >= 2:
-                logging.debug(
-                    f"Generating completion with {model}"
-                    f"{(' from deployment ' + deployment_id) if deployment_id else ''}"
-                )
-
-            async with self.limiter:
-                logger.info("-----------------")
-                logger.info("Running inference ...")
-                logger.debug(f"system:\n{system}")
-                logger.debug(f"user:\n{user}")
-                if "deepseek" in get_settings().get("config.model"):
-                    response = await acompletion(
-                        model="huggingface/deepseek-ai/deepseek-coder-33b-instruct",
-                        messages=[
-                            {"role": "system", "content": system},
-                            {"role": "user", "content": user},
-                        ],
-                        api_base=get_settings().get("config.model"),
-                        temperature=temperature,
-                        repetition_penalty=frequency_penalty+1, # the scale of TGI is different from OpenAI
-                        force_timeout=get_settings().config.ai_timeout,
-                        max_tokens=2000,
-                        stop=['<|EOT|>'],
-                    )
-                    response["choices"][0]["message"]["content"] = response["choices"][0]["message"]["content"].rstrip()
-                    if response["choices"][0]["message"]["content"].endswith("<|EOT|>"):
-                        response["choices"][0]["message"]["content"] = response["choices"][0]["message"]["content"][:-7]
-                else:
-                    response = await acompletion(
-                        model=model,
-                        deployment_id=deployment_id,
-                        messages=[
-                            {"role": "system", "content": system},
-                            {"role": "user", "content": user},
-                        ],
-                        temperature=temperature,
-                        frequency_penalty=frequency_penalty,
-                        force_timeout=get_settings().config.ai_timeout,
-                    )
-        except (APIError) as e:
-            logging.error("Error during OpenAI inference")
-            raise
-        except RateLimitError as e:
-            logging.error("Rate limit error during OpenAI inference")
-            raise
-        except Exception as e:
-            logging.error("Unknown error during OpenAI inference: ", e)
-            raise APIError from e
-        if response is None or len(response["choices"]) == 0:
-            raise APIError
-        resp = response["choices"][0]["message"]["content"]
-        finish_reason = response["choices"][0]["finish_reason"]
-        logger.debug(f"response:\n{resp}")
-        logger.info('done')
-        logger.info("-----------------")
-        return resp, finish_reason
+        """
+        Performs a chat completion using the Gemini API.
+        
+        Args:
+            model: The model to use for the completion
+            system: The system message
+            user: The user message
+            temperature: The temperature to use for the completion
+            frequency_penalty: The frequency penalty to use for the completion
+            
+        Returns:
+            A tuple containing the response text and the finish reason
+        """
+        if get_settings().config.verbosity_level >= 2:
+            logging.debug(f"Generating completion with {model}")
+        
+        # Use Gemini handler
+        return await self.gemini_handler.chat_completion(
+            model=model,
+            system=system,
+            user=user,
+            temperature=temperature,
+            frequency_penalty=frequency_penalty
+        )

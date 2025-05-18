@@ -101,20 +101,24 @@ class CodeContestsCompetitor:
 def solve_problem(dataset_name,
                   split_name="valid",
                   problem_name="",
-                  problem_number=0):
+                  problem_number=0,
+                  dataset_format="auto"):
 
     # load dataset
     base_path = os.getcwd()
     logger = get_logger(__name__)
-    data_provider = CodeContestDataProvider(dataset_location=dataset_name)
+    from alpha_codium.data_adapters.data_provider import DataProvider
+    data_provider = DataProvider(dataset_location=dataset_name, dataset_format=dataset_format)
+    
     if problem_number and problem_name:
         logger.info(f"problem_number and problem_name are both specified, using problem_name")
     if not problem_name and problem_number:
-        problem_name = data_provider.dataset[split_name][int(problem_number)]['name']
+        problem = data_provider.get_problem_by_index(split_name, int(problem_number))
+        problem_name = problem['name']
         logger.info(f"problem_name: {problem_name}")
 
     # find problem
-    problem = data_provider.find_problem(ds=data_provider.dataset, problem_name=problem_name, split_name=split_name)
+    problem = data_provider.find_problem(problem_name=problem_name, split_name=split_name)
     logger.info(f"problem['name']: {problem['name']}")
 
     # # check if problem is valid (at least one of the provided solutions actually passes the generated tests)
