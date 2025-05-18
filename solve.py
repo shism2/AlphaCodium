@@ -95,6 +95,36 @@ def load_problem_from_file(file_path):
         print(f"Error loading problem file: {e}")
         sys.exit(1)
 
+def display_models(model_manager, refresh=False):
+    """Display available models."""
+    print("Retrieving available Gemini models...")
+    models = model_manager.get_available_models(force_refresh=refresh)
+    
+    if not models:
+        print("No models found. Please check your Gemini API key.")
+        return
+    
+    print("\nAvailable Gemini Models:")
+    print("=" * 80)
+    print(f"{'Model ID':<40} {'Display Name':<25} {'Token Limit':<15}")
+    print("-" * 80)
+    
+    for model in models:
+        model_id = model.get("id", "").replace("models/", "")
+        display_name = model.get("display_name", "")
+        token_limit = f"{model.get('input_token_limit', 0):,}"
+        
+        print(f"{model_id:<40} {display_name:<25} {token_limit:<15}")
+    
+    print("=" * 80)
+    print(f"\nTotal models: {len(models)}")
+    print("\nRecommended models for code generation:")
+    
+    recommended = model_manager.get_recommended_models()
+    for i, model in enumerate(recommended[:5], 1):
+        model_id = model.get("id", "").replace("models/", "")
+        print(f"  {i}. {model_id}")
+
 def main():
     """Main function."""
     # Set up logging
@@ -102,6 +132,20 @@ def main():
     
     # Parse arguments
     args = parse_arguments()
+    
+    # Initialize model manager
+    model_manager = ModelManager()
+    
+    # Handle model listing
+    if args.list_models:
+        display_models(model_manager, refresh=args.refresh_models)
+        return 0
+    
+    # Check if we have a problem to solve
+    if not args.problem and not (args.name and args.description and args.test_inputs and args.test_outputs):
+        print("Error: You must provide either a problem file or all of: name, description, test inputs, and test outputs")
+        print("For help, run: python solve.py --help")
+        return 1
     
     # Determine output file
     output_file = args.output
@@ -131,8 +175,11 @@ def main():
             test_count = len(problem["public_tests"]["input"])
     print(f"Number of test cases: {test_count}")
     
-    # Initialize the problem solver
-    solver = SimplifiedSolver()
+    # Initialize the problem solver with the specified model
+    solver = SimplifiedSolver(model_id=args.model)
+    
+    # Display the model being used
+    print(f"\nUsing model: {solver.model}")
     
     # Solve the problem
     print("\nGenerating solution...")
