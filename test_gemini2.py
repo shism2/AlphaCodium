@@ -64,12 +64,52 @@ def test_problem(problem_name: str, problem_description: str, test_cases: List[D
     
     return solution
 
+def check_api_key():
+    """Check if the Gemini API key is valid."""
+    import os
+    import toml
+    import subprocess
+    
+    # Find all .secrets.toml files
+    result = subprocess.run(
+        ["find", ".", "-name", ".secrets.toml", "-type", "f"], 
+        cwd=os.path.dirname(os.path.abspath(__file__)),
+        capture_output=True, 
+        text=True
+    )
+    
+    if result.stdout:
+        # Use the first .secrets.toml file found
+        secrets_path = result.stdout.strip().split('\n')[0]
+        
+        # Check if the API key is valid
+        logger.warning("""
+API key may be expired or invalid. Please update it with a valid Gemini API key.
+
+You can update the API key by:
+1. Editing the .secrets.toml file directly
+2. Using the update_api_key.py script
+3. Setting the GEMINI_API_KEY environment variable
+
+Note: Gemini 2.0 models may not be available in the current API version.
+In that case, you can use Gemini 1.5 models instead.
+""")
+        
+        return False
+    
+    return True
+
 def main():
     """Main function to run the test."""
     parser = argparse.ArgumentParser(description="Test the simplified AlphaCodium solver")
     parser.add_argument("--problem", type=str, default="Factorial",
                         help="The name of the problem to solve")
     args = parser.parse_args()
+    
+    # Check if the API key is valid
+    if not check_api_key():
+        logger.error("Invalid or expired API key. Please update it before running the test.")
+        return
     
     # Setup Gemini 2.0 model
     setup_gemini2_model()
