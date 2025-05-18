@@ -8,8 +8,12 @@ using the AlphaCodium approach with Gemini 2.0 models.
 
 import argparse
 import json
-import os
 import sys
+import os
+
+# Add the parent directory to the path so we can import from alpha_codium
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
 from alpha_codium.gen.problem_solver import ProblemSolver
 
 def parse_arguments():

@@ -78,19 +78,19 @@ def solve_dataset(dataset_name='valid_and_test_processed',
             # solve problem
             solution = solver.solve_problem_in_dataset(problem, iteration, logger)
 
-            logger.info(f"solution code:\n{solution}")
+            logger.info("solution code:\n{}".format(solution))
             if not solution:
-                logger.info(f"Failed to solve problem {problem_number} in iteration {iteration}")
+                logger.info("Failed to solve problem {} in iteration {}".format(problem_number, iteration))
                 continue
-            logger.info(f"Evaluating solution on public tests...")
+            logger.info("Evaluating solution on public tests...")
             test_results, test_passed_public, test_failed_public, test_timeout_public = evaluate_solution_on_subset(
                 'public_tests', problem, solution, silent=True)
 
-            logger.info(f"evaluating solution on private tests...")
+            logger.info("evaluating solution on private tests...")
             test_results, test_passed_private, test_failed_private, test_timeout_private = evaluate_solution_on_subset(
                 'private_tests', problem, solution, silent=True)
 
-            logger.info(f"evaluating solution on generated tests...")
+            logger.info("evaluating solution on generated tests...")
             test_results, test_passed_generate, test_failed_generate, test_timeout_generate = evaluate_solution_on_subset(
                 'generated_tests', problem, solution, silent=True)
 

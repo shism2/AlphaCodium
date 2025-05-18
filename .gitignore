@@ -3,18 +3,37 @@
 
 # Python virtual environment
 venv/
+env/
+.venv/
+.env/
+ENV/
 
 # codecontests datasets
 valid_and_test_processed/
 
 # Python cache files
-**/__pycache__/
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
 
 # Secrets and configuration
-**/.secrets.toml
-.env
-
-# Secret files
 .secrets.toml
 **/.secrets.toml
 .env
@@ -23,3 +42,26 @@ valid_and_test_processed/
 # Database files
 *.db
 **/*.db
+
+# Log files
+*.log
+**/*.log
+
+# IDE files
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# Coverage reports
+htmlcov/
+.tox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover

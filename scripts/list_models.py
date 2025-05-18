@@ -7,7 +7,9 @@ import os
 import sys
 import logging
 import google.generativeai as genai
-from alpha_codium.settings.config_loader import get_settings
+
+# Add the parent directory to the path so we can import from alpha_codium
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 # Configure logging
 logging.basicConfig(

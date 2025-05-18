@@ -9,6 +9,9 @@ import logging
 import argparse
 from typing import Dict, Any, List, Optional
 
+# Add the parent directory to the path so we can import from alpha_codium
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
 import google.generativeai as genai
 from alpha_codium.settings.config_loader import get_settings
 
@@ -110,7 +113,7 @@ class Gemini2Solver:
             
             # Check if it's an API key issue
             if "API_KEY_INVALID" in error_str or "API key expired" in error_str:
-                fallback_message = f"""
+                fallback_message = """
 # Error: Invalid or expired API key
 # 
 # The Gemini API key is invalid or has expired.

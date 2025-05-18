@@ -6,7 +6,9 @@ This script helps users set up their Gemini API key and configuration.
 
 import os
 import sys
-from pathlib import Path
+
+# Add the parent directory to the path so we can import from alpha_codium
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 # Print environment information for debugging
 print(f"Python executable: {sys.executable}")
@@ -36,7 +38,7 @@ def setup_gemini_api_key():
     
     # Path to the .secrets.toml file
     secrets_path = os.path.join(
-        os.path.dirname(__file__), 
+        os.path.dirname(os.path.dirname(__file__)), 
         "alpha_codium", 
         "settings", 
         ".secrets.toml"
@@ -89,7 +91,7 @@ def setup_gemini_api_key():
         
         # Update the configuration to use Gemini
         config_path = os.path.join(
-            os.path.dirname(__file__), 
+            os.path.dirname(os.path.dirname(__file__)), 
             "alpha_codium", 
             "settings", 
             "configuration.toml"

@@ -1,5 +1,4 @@
 import asyncio
-import json
 from alpha_codium.gen.problem_solver import ProblemSolver
 
 # Create a simple test problem

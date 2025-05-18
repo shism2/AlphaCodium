@@ -1,11 +1,9 @@
 import os
 import sys
-import json
-import asyncio
 from flask import Flask, request, jsonify, render_template
 
 # Add the project root to the Python path
-sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from alpha_codium.simplified_solver import SimplifiedSolver
 from alpha_codium.llm.model_manager import ModelManager
@@ -18,10 +16,12 @@ setup_logger()
 model_manager = ModelManager()
 
 # Create templates directory if it doesn't exist
-os.makedirs('templates', exist_ok=True)
+templates_dir = os.path.join(os.path.dirname(__file__), 'templates')
+os.makedirs(templates_dir, exist_ok=True)
+app.template_folder = templates_dir
 
 # Create a simple HTML template for the web interface
-with open('templates/index.html', 'w') as f:
+with open(os.path.join(templates_dir, 'index.html'), 'w') as f:
     f.write('''
 <!DOCTYPE html>
 <html>

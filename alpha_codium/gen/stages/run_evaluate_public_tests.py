@@ -59,7 +59,7 @@ async def run_evaluate_public_tests(self, problem):
 
                     # cap the number of calls to the ai
                     if not passed_specific_test and number_of_llm_fixes >= max_allowed_fixes:
-                        logger.debug(f"Failed to pass public test. reached max number of calls")
+                        logger.debug("Failed to pass public test. reached max number of calls")
                         break
 
                     # analyze the tests results
@@ -100,7 +100,7 @@ async def run_evaluate_public_tests(self, problem):
                                         problem['passed_tests']['inputs'],
                                         problem['passed_tests']['outputs'])
                         if not passed_prev_test:
-                            logger.error(f"The fix broke prev passed tests. reverting to last solution")
+                            logger.error("The fix broke prev passed tests. reverting to last solution")
                             problem['code_recent_solution'] = last_code_solution
                             continue
 
