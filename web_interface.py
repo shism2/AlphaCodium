@@ -98,6 +98,15 @@ with open('templates/index.html', 'w') as f:
             </div>
         </div>
         
+        <div>
+            <h3>Model Selection</h3>
+            <label for="modelSelect">Select Gemini 2.0 Model:</label>
+            <select id="modelSelect" name="modelSelect">
+                <option value="">Loading models...</option>
+            </select>
+            <button type="button" id="refreshModels">Refresh Models</button>
+        </div>
+        
         <button type="button" id="addTestCase">Add Test Case</button>
         <button type="submit">Solve Problem</button>
     </form>
@@ -113,6 +122,39 @@ with open('templates/index.html', 'w') as f:
     </div>
     
     <script>
+        // Function to load models
+        function loadModels() {
+            const modelSelect = document.getElementById('modelSelect');
+            modelSelect.innerHTML = '<option value="">Loading models...</option>';
+            
+            fetch('/models')
+                .then(response => response.json())
+                .then(data => {
+                    modelSelect.innerHTML = '';
+                    
+                    if (data.models && data.models.length > 0) {
+                        data.models.forEach(model => {
+                            const option = document.createElement('option');
+                            option.value = model.id;
+                            option.textContent = model.name;
+                            modelSelect.appendChild(option);
+                        });
+                    } else {
+                        modelSelect.innerHTML = '<option value="">No models available</option>';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading models:', error);
+                    modelSelect.innerHTML = '<option value="">Error loading models</option>';
+                });
+        }
+        
+        // Load models when page loads
+        document.addEventListener('DOMContentLoaded', loadModels);
+        
+        // Refresh models button
+        document.getElementById('refreshModels').addEventListener('click', loadModels);
+        
         document.getElementById('addTestCase').addEventListener('click', function() {
             const testCases = document.getElementById('testCases');
             const testCaseCount = testCases.getElementsByClassName('test-case').length;
@@ -135,6 +177,7 @@ with open('templates/index.html', 'w') as f:
             
             const problemName = document.getElementById('problemName').value;
             const problemDescription = document.getElementById('problemDescription').value;
+            const modelId = document.getElementById('modelSelect').value;
             
             const testInputs = [];
             const testOutputs = [];
@@ -146,6 +189,12 @@ with open('templates/index.html', 'w') as f:
             document.querySelectorAll('[name="testOutputs[]"]').forEach(output => {
                 testOutputs.push(output.value);
             });
+            
+            // Validate model selection
+            if (!modelId) {
+                alert('Please select a model');
+                return;
+            }
             
             // Show loading indicator
             document.getElementById('loading').style.display = 'block';
@@ -161,7 +210,8 @@ with open('templates/index.html', 'w') as f:
                     problemName: problemName,
                     problemDescription: problemDescription,
                     testInputs: testInputs,
-                    testOutputs: testOutputs
+                    testOutputs: testOutputs,
+                    modelId: modelId
                 })
             })
             .then(response => response.json())
