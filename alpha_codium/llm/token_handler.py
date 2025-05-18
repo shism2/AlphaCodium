@@ -1,7 +1,5 @@
 from jinja2 import Environment, StrictUndefined
 
-from alpha_codium.settings.config_loader import get_settings
-
 
 class TokenHandler:
     """

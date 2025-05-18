@@ -1,12 +1,10 @@
 import json
 import os
-import shutil
 from collections import OrderedDict
 
-from alpha_codium.code_contests.data.provider import CodeContestDataProvider
 from alpha_codium.gen.coding_competitor import CodeContestsCompetitor
 from alpha_codium.gen.utils import evaluate_solution_on_subset
-from alpha_codium.log import setup_logger, get_logger
+from alpha_codium.log import setup_logger
 from alpha_codium.settings.config_loader import get_settings
 
 

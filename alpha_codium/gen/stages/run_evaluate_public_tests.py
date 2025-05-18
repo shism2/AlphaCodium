@@ -54,7 +54,7 @@ async def run_evaluate_public_tests(self, problem):
                     if -1 < d_tot < best_d:
                         if counter_test > 0:
                             logger.info(f"Found better solution, d_tot: {d_tot}")
-                        best_solution = copy.deepcopy(problem['code_recent_solution'])
+                        copy.deepcopy(problem['code_recent_solution'])
                         best_d = d_tot
 
                     # cap the number of calls to the ai
@@ -116,13 +116,13 @@ async def run_evaluate_public_tests(self, problem):
                 all_passed_public = all_passed_public and passed_specific_test
 
             if all_passed_public:
-                logger.info(f"==================")
-                logger.info(f"Passed all public tests")
-                logger.info(f"==================")
+                logger.info("==================")
+                logger.info("Passed all public tests")
+                logger.info("==================")
             else:
-                logger.info(f"==================")
-                logger.info(f"Failed to pass all public tests")
-                logger.info(f"==================")
+                logger.info("==================")
+                logger.info("Failed to pass all public tests")
+                logger.info("==================")
 
             return problem
         except Exception as e:

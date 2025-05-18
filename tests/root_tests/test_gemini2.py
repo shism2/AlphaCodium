@@ -6,7 +6,7 @@ Test script for the simplified AlphaCodium solver using Gemini 2.0 models.
 import argparse
 import logging
 import sys
-from typing import Dict, Any, List, Optional
+from typing import Dict, List
 
 from alpha_codium.simplified_solver import SimplifiedSolver
 from alpha_codium.settings.config_loader import get_settings, update_settings
@@ -67,7 +67,6 @@ def test_problem(problem_name: str, problem_description: str, test_cases: List[D
 def check_api_key():
     """Check if the Gemini API key is valid."""
     import os
-    import toml
     import subprocess
     
     # Find all .secrets.toml files
@@ -79,9 +78,6 @@ def check_api_key():
     )
     
     if result.stdout:
-        # Use the first .secrets.toml file found
-        secrets_path = result.stdout.strip().split('\n')[0]
-        
         # Check if the API key is valid
         logger.warning("""
 API key may be expired or invalid. Please update it with a valid Gemini API key.

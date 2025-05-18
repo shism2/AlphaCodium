@@ -1,4 +1,3 @@
-import functools
 import logging
 import numpy as np
 from alpha_codium.code_contests.eval.code_test_runners import eval_solution
@@ -31,7 +30,7 @@ def run_tests(self, problem, counter, test_inputs, test_outputs):
                 if t.actual_output:
                     error_str += f"code output:\n{t.actual_output}\n'Timeout, took too long to run next test'\n"
                 else:
-                    error_str += f"code output:\n'Timeout, took too long to run the test'\n"
+                    error_str += "code output:\n'Timeout, took too long to run the test'\n"
         elif str(results.test_results[0].program_status) == 'ProgramStatus.kFailed':
             logger.error("failed to run solution")
             error_str = results.test_results[0].sandbox_result
@@ -58,10 +57,9 @@ def run_tests(self, problem, counter, test_inputs, test_outputs):
                 error_str += f"test input:\n{test_inputs[i]}\n" \
                              f"expected output:\n{t.expected_output}\n" \
                              f"code output:\n{t.actual_output}\n" \
-                             # f"====================\n====================\n"
+                             # "====================\n====================\n"
 
-                trace_str += f"trace:\n{render_trace(t.trace)}\n" \
-                             f"====================\n====================\n"
+                trace_str += f"trace:\n{render_trace(t.trace)}\n====================\n===================="
 
                 # if get_settings().code_tester.calc_trace:
                 #     logger.debug(f"trace_str:\n{trace_str}")

@@ -42,7 +42,7 @@ def test_problem_solver():
     logger.info(f"Solution:\n{solution}")
     
     # Evaluate the solution
-    logger.info(f"Evaluating solution on public tests...")
+    logger.info("Evaluating solution on public tests...")
     test_results, test_passed, test_failed, test_timeout = evaluate_solution_on_subset(
         'public_tests', problem, solution, silent=False
     )

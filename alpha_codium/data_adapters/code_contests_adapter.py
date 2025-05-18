@@ -1,7 +1,7 @@
 import os
 from typing import Dict, Any, List, Optional
 
-from datasets import Dataset, DatasetDict, load_dataset, load_from_disk
+from datasets import DatasetDict, load_dataset, load_from_disk
 
 from alpha_codium.data_adapters.base_adapter import DatasetAdapter
 from alpha_codium.settings.config_loader import get_settings
@@ -22,19 +22,19 @@ class CodeContestsAdapter(DatasetAdapter):
         """Parse the dataset location and determine how to load it."""
         result_location = dataset_location
         dataset_name = dataset_location.split(os.path.sep)[-1]
-        load_from_disk = True
-        if load_from_disk:
+        should_load_from_disk = True
+        if should_load_from_disk:
             if not result_location.startswith(os.path.sep):
                 result_location = os.path.join(
                     self.private_datasets_root, result_location
                 )
-        return result_location, dataset_name, load_from_disk
+        return result_location, dataset_name, should_load_from_disk
 
     def load_dataset(self, dataset_location: str) -> DatasetDict:
         """Load the CodeContests dataset from disk or HuggingFace."""
-        location, _, load_from_disk = self.parse_location(dataset_location)
+        location, _, should_load_from_disk = self.parse_location(dataset_location)
         
-        if load_from_disk:
+        if should_load_from_disk:
             return load_from_disk(location)
         else:
             return load_dataset(location)

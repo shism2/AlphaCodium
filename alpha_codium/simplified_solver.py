@@ -6,11 +6,8 @@ for solving programming problems using Gemini 2.0 models.
 """
 
 import asyncio
-import logging
 import time
-from typing import Dict, Any, List, Optional, Tuple
-import json
-import os
+from typing import Dict, Any, Optional
 
 from alpha_codium.llm.ai_handler import AiHandler
 from alpha_codium.llm.model_manager import ModelManager
@@ -273,7 +270,7 @@ Provide an improved solution that addresses these issues."""
             
             # Check if it's an API key issue
             if "API_KEY_INVALID" in error_str or "API key expired" in error_str:
-                fallback_message = f"""
+                fallback_message = """
 # Error: Invalid or expired API key
 # 
 # The Gemini API key is invalid or has expired.
@@ -317,7 +314,7 @@ Provide an improved solution that addresses these issues."""
         # Save the solution to the database
         if problem_id > 0:
             success = len(solution) > 0 and not solution.startswith("# Error")
-            solution_id = self.db_manager.save_solution(
+            self.db_manager.save_solution(
                 problem_id=problem_id,
                 model_id=self.model,
                 code=solution,

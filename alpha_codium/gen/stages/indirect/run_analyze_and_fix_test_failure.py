@@ -1,5 +1,4 @@
 import ast
-import difflib
 import functools
 import logging
 import yaml
@@ -44,8 +43,9 @@ async def run_analyze_and_fix_test_failure(self, problem, error_str):
             problem['code_recent_solution'] = code_recent_solution
 
             # diff patch
-            diff = difflib.unified_diff(problem['code_prev_solution'].splitlines(keepends=True),
-                                        problem['code_recent_solution'].splitlines(keepends=True))
+            # Uncomment if needed:
+            # diff = difflib.unified_diff(problem['code_prev_solution'].splitlines(keepends=True),
+            #                            problem['code_recent_solution'].splitlines(keepends=True))
             # patch = ''.join(diff)
             # if get_settings().solve.reduce_verbose:
             #     logger.debug(f"diff:\n{patch}")

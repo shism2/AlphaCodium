@@ -1,7 +1,6 @@
-import difflib
 import functools
 import logging
-from alpha_codium.settings.config_loader import get_settings
+
 from alpha_codium.llm.ai_invoker import send_inference
 from alpha_codium.log import get_logger
 
@@ -24,8 +23,9 @@ async def run_fix_code_from_tests_failure(self, problem,error_str):
             problem['code_recent_solution'] = response_fixed_code
 
             # diff patch
-            diff = difflib.unified_diff(problem['code_prev_solution'].splitlines(keepends=True),
-                                        response_fixed_code.splitlines(keepends=True))
+            # Uncomment if needed:
+            # diff = difflib.unified_diff(problem['code_prev_solution'].splitlines(keepends=True),
+            #                            response_fixed_code.splitlines(keepends=True))
             # patch = ''.join(diff)
             # if get_settings().solve.reduce_verbose:
             #     logger.debug(f"diff:\n{patch}")

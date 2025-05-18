@@ -142,7 +142,7 @@ def try_fix_yaml(response_text: str, keys_fix_yaml: List[str] = []) -> dict:
                                                                                   f'{key} |-\n        ')
     try:
         data = yaml.safe_load('\n'.join(response_text_lines_copy))
-        get_logger().info(f"Successfully parsed AI prediction after adding |-\n")
+        get_logger().info("Successfully parsed AI prediction after adding |-\n")
         return data
     except:
         raise "yaml parsing error"

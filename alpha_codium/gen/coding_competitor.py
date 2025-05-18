@@ -3,7 +3,7 @@ import logging
 import os
 from jinja2 import Environment, StrictUndefined
 
-from alpha_codium.code_contests.data.provider import CodeContestDataProvider
+
 from alpha_codium.gen.stages.run_baseline import run_baseline
 from alpha_codium.gen.stages.run_choose_best_solution import run_choose_best_solution
 from alpha_codium.gen.stages.run_evaluate_all_ai_tests import run_evaluate_all_ai_tests
@@ -111,7 +111,7 @@ def solve_problem(dataset_name,
     data_provider = DataProvider(dataset_location=dataset_name, dataset_format=dataset_format)
     
     if problem_number and problem_name:
-        logger.info(f"problem_number and problem_name are both specified, using problem_name")
+        logger.info("problem_number and problem_name are both specified, using problem_name")
     if not problem_name and problem_number:
         problem = data_provider.get_problem_by_index(split_name, int(problem_number))
         problem_name = problem['name']
@@ -123,7 +123,7 @@ def solve_problem(dataset_name,
 
     # # check if problem is valid (at least one of the provided solutions actually passes the generated tests)
     # if not problem.get('is_valid_problem', True):
-    #     logger.info(f"problem['is_valid_problem'] == False, skipping")
+    #     logger.info("problem['is_valid_problem'] == False, skipping")
     #     return None, None
 
     # evaluate prev solutions
@@ -151,7 +151,7 @@ def solve_problem(dataset_name,
                     break
 
             if not found_solution:
-                logger.info(f"None of the public solutions passed all tests")
+                logger.info("None of the public solutions passed all tests")
         except Exception as e:
             logger.error(f"Error evaluating public solutions: {e}")
             pass
@@ -162,20 +162,20 @@ def solve_problem(dataset_name,
     solution = solver.solve_problem_in_dataset(problem)
     logger.info(f"testing solution on private tests with prediction:\n{solution}")
 
-    logger.info(f"evaluating solution on public tests...")
+    logger.info("evaluating solution on public tests...")
     test_results, test_passed_public, test_failed_public, test_timeout_public = evaluate_solution_on_subset('public_tests',
                                                                                                        problem,
                                                                                                        solution,
                                                                                                        silent=True)
 
 
-    logger.info(f"evaluating solution on private tests...")
+    logger.info("evaluating solution on private tests...")
     test_results, test_passed_private, test_failed_private, test_timeout_private = evaluate_solution_on_subset('private_tests',
                                                                                                        problem,
                                                                                                        solution,
                                                                                                        silent=True)
 
-    logger.info(f"evaluating solution on generated tests...")
+    logger.info("evaluating solution on generated tests...")
     test_results, test_passed_generate, test_failed_generate, test_timeout_generate = evaluate_solution_on_subset(
         'generated_tests', problem, solution, silent=True)
 

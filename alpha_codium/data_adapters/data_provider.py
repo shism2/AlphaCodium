@@ -1,11 +1,9 @@
-import os
 from typing import Optional, Dict, Any, List
 
 import duckdb
-from datasets import Dataset, DatasetDict
+from datasets import DatasetDict
 
 from alpha_codium.data_adapters.adapter_factory import DatasetAdapterFactory
-from alpha_codium.data_adapters.base_adapter import DatasetAdapter
 
 
 class DataProvider:

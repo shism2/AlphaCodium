@@ -10,7 +10,6 @@ import json
 import time
 from typing import List, Dict, Any, Optional
 from pathlib import Path
-import logging
 
 from google import genai
 from alpha_codium.log import get_logger
@@ -45,7 +44,7 @@ class ModelManager:
         # Initialize Gemini client
         try:
             self.client = genai.Client(api_key=get_settings().gemini.key)
-        except AttributeError as e:
+        except AttributeError:
             self.logger.error("Gemini API key is required")
             self.client = None
     

@@ -30,7 +30,7 @@ def test_genai_directly(api_key=None):
                         config = toml.load(f)
                         if "gemini" in config and "key" in config["gemini"]:
                             api_key = config["gemini"]["key"]
-                            print(f"Using API key from .secrets.toml")
+                            print("Using API key from .secrets.toml")
                 except Exception as e:
                     print(f"Error reading .secrets.toml: {e}")
             

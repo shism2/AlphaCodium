@@ -1,5 +1,5 @@
 import asyncio
-from typing import Dict, Any, Optional, Tuple
+from typing import Dict, Any, Tuple
 from jinja2 import Environment, StrictUndefined
 
 from alpha_codium.gen.stages.run_baseline import run_baseline

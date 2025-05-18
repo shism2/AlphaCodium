@@ -2,12 +2,11 @@ import argparse
 import json
 import os
 import tempfile
-from typing import Dict, Any, List, Optional
+from typing import Dict, Any, List
 
 from alpha_codium.gen.problem_solver import ProblemSolver
 from alpha_codium.gen.utils import evaluate_solution_on_subset
 from alpha_codium.log import setup_logger, get_logger
-from alpha_codium.settings.config_loader import get_settings
 
 
 def create_problem_json(problem_description: str, 
@@ -89,7 +88,7 @@ def solve_user_problem(problem_description: str,
     solution = solver.solve_problem(problem)
     
     # Evaluate the solution
-    logger.info(f"Evaluating solution on provided tests...")
+    logger.info("Evaluating solution on provided tests...")
     test_results, test_passed, test_failed, test_timeout = evaluate_solution_on_subset(
         'public_tests', problem, solution, silent=False
     )
