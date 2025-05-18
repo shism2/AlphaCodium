@@ -1,7 +1,5 @@
 import os
-import sys
 import toml
-from pathlib import Path
 from google import genai
 
 def test_genai_directly(api_key=None):

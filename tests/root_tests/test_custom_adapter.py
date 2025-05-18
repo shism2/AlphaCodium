@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 
-import json
 from alpha_codium.data_adapters.data_provider import DataProvider
 
 def main():

@@ -1,7 +1,5 @@
 import pathlib
-from os import listdir
-from os.path import abspath, dirname, join, isfile
-import glob
+from os.path import abspath, dirname, join
 
 from dynaconf import Dynaconf
 
@@ -10,8 +8,6 @@ PR_AGENT_TOML_KEY = "pr-agent"
 current_dir = dirname(abspath(__file__))
 # setting_dir = join(current_dir, "settings")
 setting_dir = current_dir
-
-
 
 toml_files = list(pathlib.Path(join(setting_dir)).glob('*.toml')) # includes hidden files
 global_settings = Dynaconf(

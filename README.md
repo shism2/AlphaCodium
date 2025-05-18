@@ -9,6 +9,7 @@ Official Implementation
 ## Table of Contents
 - [Abstract](#abstract)
 - [Installation](#installation)
+- [Project Structure](#project-structure)
 - [How to run](#how-to-run)
   - [Web Interface](#web-interface)
   - [Command Line Interface](#command-line-interface)
@@ -42,6 +43,47 @@ python setup_gemini.py
 
 *Add more installation instructions from the original README.md*
 
+## Project Structure
+
+The AlphaCodium codebase is organized as follows:
+
+```
+AlphaCodium/
+├── alpha_codium/         # Core implementation of AlphaCodium
+│   ├── cli/              # Command-line interface scripts
+│   ├── code_contests/    # Code contests dataset handling
+│   ├── data_adapters/    # Data adapters for different dataset formats
+│   ├── db/               # Database management for solutions
+│   ├── gen/              # Core generation components
+│   │   ├── stages/       # Different stages of the solution process
+│   ├── llm/              # LLM integration components
+│   ├── log/              # Logging utilities
+│   └── settings/         # Configuration settings
+├── scripts/              # Utility scripts for running AlphaCodium
+├── tests/                # Test files
+│   └── root_tests/       # Tests from the root directory
+└── sample_problems/      # Example problems for testing
+```
+
+### Scripts Directory
+
+The `scripts/` directory contains utility scripts for running AlphaCodium:
+
+- `solve.py`: Unified command-line interface for solving programming problems
+- `solve_problem.py`: Command-line interface for solving a single problem
+- `list_models.py`: List available LLM models
+- `setup_gemini.py`: Set up Gemini API key
+- `gemini2_solver.py`: Solve problems using Gemini 2.0 models
+- `web_interface.py`: Web interface for solving problems
+
+### Alpha Codium CLI Directory
+
+The `alpha_codium/cli/` directory contains command-line interface scripts:
+
+- `solve_dataset.py`: Solve a dataset of problems
+- `solve_problem.py`: Solve a single problem from a dataset
+- `solve_user_problem.py`: Solve a user-provided problem
+
 ## How to run
 
 ### Web Interface
@@ -49,7 +91,8 @@ python setup_gemini.py
 You can use the web interface to solve programming problems:
 
 ```bash
-python web_interface.py
+# From the root directory
+python scripts/web_interface.py
 ```
 
 Then open your browser to http://localhost:12000
@@ -58,14 +101,29 @@ Then open your browser to http://localhost:12000
 
 You can use the command line interface to solve programming problems:
 
+#### Using the scripts directory:
+
 ```bash
-python solve_problem.py --problem sample_problems/factorial.json
+# From the root directory
+python scripts/solve_problem.py --problem sample_problems/factorial.json
 ```
 
 Or specify the problem details directly:
 
 ```bash
-python solve_problem.py --name "Factorial" --description "Write a function to calculate factorial" --test-inputs "5" "0" --test-outputs "120" "1" --output factorial_solution.py
+python scripts/solve_problem.py --name "Factorial" --description "Write a function to calculate factorial" --test-inputs "5" "0" --test-outputs "120" "1" --output factorial_solution.py
+```
+
+#### Using the alpha_codium CLI:
+
+```bash
+# From the root directory
+python -m alpha_codium.cli.solve_problem --problem_name "factorial"
+```
+
+```bash
+# Solve an entire dataset
+python -m alpha_codium.cli.solve_dataset --dataset_name "valid_and_test_processed"
 ```
 
 ### Python API

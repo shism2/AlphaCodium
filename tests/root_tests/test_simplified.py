@@ -4,16 +4,10 @@ Test script for the simplified AlphaCodium implementation.
 This script tests the ProblemSolver class with a simple problem.
 """
 
-import os
-import sys
 import logging
-
-# Add the project root to the Python path
-sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))
 
 from alpha_codium.gen.problem_solver import ProblemSolver
 from alpha_codium.gen.utils import evaluate_solution_on_subset
-from alpha_codium.settings.config_loader import get_settings
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)

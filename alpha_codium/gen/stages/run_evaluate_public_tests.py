@@ -42,7 +42,7 @@ async def run_evaluate_public_tests(self, problem):
                 counter_test = 0
                 passed_specific_test = False
                 last_code_solution = copy.deepcopy(problem['code_recent_solution'])
-                best_solution = copy.deepcopy(problem['code_recent_solution'])
+                # best_solution = copy.deepcopy(problem['code_recent_solution'])  # Unused variable
                 best_d = float('inf')
                 while not passed_specific_test:
 
