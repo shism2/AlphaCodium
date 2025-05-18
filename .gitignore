@@ -9,3 +9,17 @@ valid_and_test_processed/
 
 # Python cache files
 **/__pycache__/
+
+# Secrets and configuration
+**/.secrets.toml
+.env
+
+# Secret files
+.secrets.toml
+**/.secrets.toml
+.env
+**/.env
+
+# Database files
+*.db
+**/*.db
