@@ -69,7 +69,7 @@ The file: `alpha_codium/settings/configuration.toml` contains the configuration 
 In the `config` section you can choose the model you want to use:
 
 #### Supported Models
-- **Google Gemini models**: "gemini-1.5-pro", "gemini-1.5-flash", "gemini-2.0-pro", "gemini-2.0-flash"
+- **Google Gemini models**: "gemini-2.0-pro", "gemini-2.0-flash" (only Gemini 2.0 models are supported)
 
 #### API Keys
 To use these models, you need to provide the appropriate API key in the `alpha_codium/settings/.secrets.toml` file:
@@ -81,8 +81,41 @@ key = "your-gemini-api-key"  # Required for Google Gemini models
 
 You can copy the template from `alpha_codium/settings/.secrets_template.toml` to get started.
 
-### Solving a specific problem
-To solve a specific problem with AlphaCodium, from the root folder run:
+### Simplified Command-Line Interface
+AlphaCodium now includes a simplified command-line interface for solving programming problems:
+
+```bash
+# Solve a problem from a JSON file
+python solve.py --problem sample_problems/fibonacci.json
+
+# List available Gemini models
+python solve.py --list-models
+
+# Use a specific model
+python solve.py --problem sample_problems/fibonacci.json --model "gemini-2.0-pro"
+
+# Show database statistics
+python solve.py --stats
+
+# Show recent problems
+python solve.py --recent 5
+
+# Disable solution caching
+python solve.py --problem sample_problems/fibonacci.json --no-cache
+```
+
+### Database Features
+AlphaCodium now includes a SQLite database to store problems, solutions, and model information:
+
+- **Problem Storage**: All problems are stored in the database for future reference
+- **Solution Caching**: Solutions are cached by model, allowing for quick retrieval of previously solved problems
+- **Model Management**: Information about available models is stored and can be retrieved
+- **Statistics**: View statistics about your problem-solving history
+
+The database is stored at `~/.alpha_codium/alpha_codium.db` by default, but you can specify a custom location with the `--db-path` option.
+
+### Solving a specific problem (Legacy Method)
+To solve a specific problem with the original AlphaCodium approach, from the root folder run:
 ```
 python -m alpha_codium.solve_problem \
 --dataset_name /path/to/dataset \

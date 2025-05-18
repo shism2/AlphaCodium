@@ -7,12 +7,15 @@ from flask import Flask, request, jsonify, render_template
 # Add the project root to the Python path
 sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))
 
-from alpha_codium.gen.problem_solver import ProblemSolver
+from alpha_codium.simplified_solver import SimplifiedSolver
+from alpha_codium.llm.model_manager import ModelManager
 from alpha_codium.log import setup_logger
 
 app = Flask(__name__)
 setup_logger()
-solver = ProblemSolver()
+
+# Initialize model manager to get available models
+model_manager = ModelManager()
 
 # Create templates directory if it doesn't exist
 os.makedirs('templates', exist_ok=True)
@@ -183,7 +186,40 @@ with open('templates/index.html', 'w') as f:
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    # Get available models
+    models = model_manager.get_available_models(refresh=False)
+    # Filter to only include Gemini 2.0 models
+    gemini_models = [model for model in models if model.get('id', '').startswith('gemini-2.0')]
+    
+    # Convert models to a format suitable for the template
+    model_options = []
+    for model in gemini_models:
+        model_id = model.get('id', '').replace('models/', '')
+        model_options.append({
+            'id': model_id,
+            'name': model.get('displayName', model_id)
+        })
+    
+    # Pass models to the template
+    return render_template('index.html', models=model_options)
+
+@app.route('/models', methods=['GET'])
+def get_models():
+    # Get available models
+    models = model_manager.get_available_models(refresh=True)
+    # Filter to only include Gemini 2.0 models
+    gemini_models = [model for model in models if model.get('id', '').startswith('gemini-2.0')]
+    
+    # Convert models to a format suitable for the template
+    model_options = []
+    for model in gemini_models:
+        model_id = model.get('id', '').replace('models/', '')
+        model_options.append({
+            'id': model_id,
+            'name': model.get('displayName', model_id)
+        })
+    
+    return jsonify({'models': model_options})
 
 @app.route('/solve', methods=['POST'])
 def solve():
@@ -193,6 +229,7 @@ def solve():
     problem_description = data.get('problemDescription', '')
     test_inputs = data.get('testInputs', [])
     test_outputs = data.get('testOutputs', [])
+    model_id = data.get('modelId', None)
     
     # Validate inputs
     if not problem_description:
@@ -209,17 +246,16 @@ def solve():
         problem = {
             'name': problem_name,
             'description': problem_description,
-            'public_tests': {
-                'input': test_inputs,
-                'output': test_outputs
-            }
+            'public_tests': [
+                {'input': inp, 'output': out} for inp, out in zip(test_inputs, test_outputs)
+            ]
         }
         
-        # Solve the problem asynchronously
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
-        solution = loop.run_until_complete(solver.solve(problem))
-        loop.close()
+        # Initialize the solver with the selected model
+        solver = SimplifiedSolver(model_id=model_id)
+        
+        # Solve the problem
+        solution = solver.solve_problem(problem)
         
         return jsonify({'solution': solution})
     except Exception as e:

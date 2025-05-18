@@ -7,6 +7,7 @@ for solving programming problems using Gemini 2.0 models.
 
 import asyncio
 import logging
+import time
 from typing import Dict, Any, List, Optional, Tuple
 import json
 import os
@@ -23,13 +24,14 @@ class SimplifiedSolver:
     This class focuses on the core functionality and removes unnecessary complexity.
     """
     
-    def __init__(self, model_id: Optional[str] = None, db_path: Optional[str] = None):
+    def __init__(self, model_id: Optional[str] = None, db_path: Optional[str] = None, use_cache: bool = True):
         """
         Initialize the SimplifiedSolver.
         
         Args:
             model_id: The ID of the model to use. If None, uses the default from configuration.
             db_path: Path to the SQLite database file. If None, uses the default path.
+            use_cache: Whether to use cached solutions from the database.
         """
         self.ai_handler = AiHandler()
         self.logger = get_logger(__name__)
@@ -39,6 +41,9 @@ class SimplifiedSolver:
         
         # Initialize database manager
         self.db_manager = DatabaseManager(db_path=db_path)
+        
+        # Set cache usage
+        self.use_cache = use_cache
         
         # Set the model to use
         if model_id:
@@ -266,6 +271,16 @@ Provide an improved solution that addresses these issues."""
 """
                 return fallback_message
             
+            # Check if it's an API key issue
+            if "API_KEY_INVALID" in error_str or "API key expired" in error_str:
+                fallback_message = f"""
+# Error: Invalid or expired API key
+# 
+# The Gemini API key is invalid or has expired.
+# Please update the API key in the .secrets.toml file or set the GEMINI_API_KEY environment variable.
+"""
+                return fallback_message
+            
             return f"# Error solving problem\n# {str(e)}"
     
     def solve_problem(self, problem: Dict[str, Any]) -> str:
@@ -285,12 +300,14 @@ Provide an improved solution that addresses these issues."""
         problem_id = self.db_manager.save_problem(normalized_problem)
         
         # Check if we already have a solution for this problem with the current model
-        if problem_id > 0:
+        if self.use_cache and problem_id > 0:
             solutions = self.db_manager.get_solutions_for_problem(problem_id)
             for solution in solutions:
                 if solution["model_id"] == self.model and solution["success"]:
                     self.logger.info(f"Found existing solution for problem {problem_id} using model {self.model}")
                     return solution["code"]
+        elif not self.use_cache:
+            self.logger.info("Solution cache is disabled, generating new solution")
         
         # No existing solution found, generate a new one
         start_time = time.time()

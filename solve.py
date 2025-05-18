@@ -247,7 +247,11 @@ def main():
     print(f"Number of test cases: {test_count}")
     
     # Initialize the problem solver with the specified model
-    solver = SimplifiedSolver(model_id=args.model, db_path=args.db_path)
+    solver = SimplifiedSolver(
+        model_id=args.model, 
+        db_path=args.db_path,
+        use_cache=not args.no_cache
+    )
     
     # Display the model being used
     print(f"\nUsing model: {solver.model}")
