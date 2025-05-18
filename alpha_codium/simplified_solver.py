@@ -13,6 +13,7 @@ import os
 
 from alpha_codium.llm.ai_handler import AiHandler
 from alpha_codium.llm.model_manager import ModelManager
+from alpha_codium.db.database_manager import DatabaseManager
 from alpha_codium.log import get_logger
 from alpha_codium.settings.config_loader import get_settings
 
@@ -22,12 +23,13 @@ class SimplifiedSolver:
     This class focuses on the core functionality and removes unnecessary complexity.
     """
     
-    def __init__(self, model_id: Optional[str] = None):
+    def __init__(self, model_id: Optional[str] = None, db_path: Optional[str] = None):
         """
         Initialize the SimplifiedSolver.
         
         Args:
             model_id: The ID of the model to use. If None, uses the default from configuration.
+            db_path: Path to the SQLite database file. If None, uses the default path.
         """
         self.ai_handler = AiHandler()
         self.logger = get_logger(__name__)
@@ -35,11 +37,20 @@ class SimplifiedSolver:
         # Initialize model manager
         self.model_manager = ModelManager()
         
+        # Initialize database manager
+        self.db_manager = DatabaseManager(db_path=db_path)
+        
         # Set the model to use
         if model_id:
             self.model = model_id
         else:
-            self.model = get_settings().config.get('model', 'gemini-2.0-flash')
+            # Always use Gemini 2.0 models
+            config_model = get_settings().config.get('model', 'gemini-2.0-flash')
+            if not config_model.startswith('gemini-2.0'):
+                self.logger.warning(f"Configured model {config_model} is not a Gemini 2.0 model. Using gemini-2.0-flash instead.")
+                self.model = 'gemini-2.0-flash'
+            else:
+                self.model = config_model
         
         # Load prompt templates
         self._load_prompts()
@@ -237,6 +248,24 @@ Provide an improved solution that addresses these issues."""
             
         except Exception as e:
             self.logger.error(f"Error solving problem: {e}")
+            
+            # Check if it's a model availability issue
+            error_str = str(e)
+            if "NOT_FOUND" in error_str and "models/" in error_str:
+                model_name = self.model
+                fallback_message = f"""
+# Error: Model {model_name} is not available
+# 
+# The requested Gemini 2.0 model is not available in the current API version.
+# Please check the available models using the Google AI Studio or API documentation.
+#
+# You can try:
+# 1. Using a different Gemini 2.0 model (gemini-2.0-pro or gemini-2.0-flash)
+# 2. Checking if your API key has access to Gemini 2.0 models
+# 3. Updating the Google Generative AI Python library
+"""
+                return fallback_message
+            
             return f"# Error solving problem\n# {str(e)}"
     
     def solve_problem(self, problem: Dict[str, Any]) -> str:
@@ -251,7 +280,40 @@ Provide an improved solution that addresses these issues."""
         """
         # Normalize the problem format
         normalized_problem = self._normalize_problem_format(problem)
-        return asyncio.run(self.solve(normalized_problem))
+        
+        # Save the problem to the database
+        problem_id = self.db_manager.save_problem(normalized_problem)
+        
+        # Check if we already have a solution for this problem with the current model
+        if problem_id > 0:
+            solutions = self.db_manager.get_solutions_for_problem(problem_id)
+            for solution in solutions:
+                if solution["model_id"] == self.model and solution["success"]:
+                    self.logger.info(f"Found existing solution for problem {problem_id} using model {self.model}")
+                    return solution["code"]
+        
+        # No existing solution found, generate a new one
+        start_time = time.time()
+        solution = asyncio.run(self.solve(normalized_problem))
+        execution_time = time.time() - start_time
+        
+        # Save the solution to the database
+        if problem_id > 0:
+            success = len(solution) > 0 and not solution.startswith("# Error")
+            solution_id = self.db_manager.save_solution(
+                problem_id=problem_id,
+                model_id=self.model,
+                code=solution,
+                execution_time=execution_time,
+                success=success
+            )
+            
+            # Save model information if available
+            model_info = self.model_manager.get_model_by_id(self.model)
+            if model_info:
+                self.db_manager.save_model_info(model_info)
+        
+        return solution
     
     def _normalize_problem_format(self, problem: Dict[str, Any]) -> Dict[str, Any]:
         """

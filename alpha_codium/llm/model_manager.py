@@ -195,6 +195,7 @@ class ModelManager:
     def get_recommended_models(self) -> List[Dict[str, Any]]:
         """
         Get a list of recommended models for code generation.
+        Only includes Gemini 2.0 models and above.
         
         Returns:
             A list of recommended model information dictionaries
@@ -205,9 +206,6 @@ class ModelManager:
         priority_models = [
             "gemini-2.0-pro",
             "gemini-2.0-flash",
-            "gemini-1.5-pro",
-            "gemini-1.5-flash",
-            "gemini-1.0-pro",
         ]
         
         # Filter and sort models based on priority
@@ -217,9 +215,9 @@ class ModelManager:
                 if priority_model in model["id"].lower():
                     recommended.append(model)
         
-        # Add any other Gemini models not in the priority list
+        # Add any other Gemini 2.0+ models not in the priority list
         for model in all_models:
-            if not any(model["id"] == rec["id"] for rec in recommended):
+            if "gemini-2" in model["id"].lower() and not any(model["id"] == rec["id"] for rec in recommended):
                 recommended.append(model)
         
         return recommended

@@ -13,6 +13,7 @@ import sys
 import time
 from alpha_codium.simplified_solver import SimplifiedSolver
 from alpha_codium.llm.model_manager import ModelManager
+from alpha_codium.db.database_manager import DatabaseManager
 from alpha_codium.log import setup_logger
 
 def parse_arguments():
@@ -53,6 +54,13 @@ Examples:
     model_group.add_argument("--list-models", action="store_true", help="List available Gemini models")
     model_group.add_argument("--model", type=str, help="Specify the model to use (e.g., gemini-2.0-flash)")
     model_group.add_argument("--refresh-models", action="store_true", help="Force refresh of the model cache")
+    
+    # Database options
+    db_group = parser.add_argument_group('Database Options')
+    db_group.add_argument("--db-path", type=str, help="Path to the SQLite database file")
+    db_group.add_argument("--stats", action="store_true", help="Show database statistics and exit")
+    db_group.add_argument("--recent", type=int, nargs="?", const=10, help="Show recent problems and exit (default: 10)")
+    db_group.add_argument("--no-cache", action="store_true", help="Don't use cached solutions")
     
     # Output options
     output_group = parser.add_argument_group('Output Options')
@@ -125,6 +133,56 @@ def display_models(model_manager, refresh=False):
         model_id = model.get("id", "").replace("models/", "")
         print(f"  {i}. {model_id}")
 
+def display_stats(db_manager):
+    """Display database statistics."""
+    print("Retrieving database statistics...")
+    stats = db_manager.get_statistics()
+    
+    print("\nAlphaCodium Database Statistics:")
+    print("=" * 80)
+    print(f"Total problems: {stats['problem_count']}")
+    print(f"Total solutions: {stats['solution_count']}")
+    print(f"Success rate: {stats['success_rate']:.2f}%")
+    print(f"Average execution time: {stats['avg_execution_time']:.2f} seconds")
+    print(f"Total models: {stats['model_count']}")
+    
+    if stats['most_used_model']:
+        print(f"Most used model: {stats['most_used_model']} ({stats['most_used_model_count']} uses)")
+    
+    print("=" * 80)
+
+def display_recent_problems(db_manager, limit=10):
+    """Display recent problems."""
+    print(f"Retrieving {limit} most recent problems...")
+    problems = db_manager.get_recent_problems(limit=limit)
+    
+    if not problems:
+        print("No problems found in the database.")
+        return
+    
+    print(f"\nRecent Problems ({len(problems)}):")
+    print("=" * 80)
+    print(f"{'ID':<5} {'Name':<30} {'Test Cases':<10} {'Solutions':<10} {'Last Updated':<20}")
+    print("-" * 80)
+    
+    for problem in problems:
+        # Get solution count for this problem
+        solutions = db_manager.get_solutions_for_problem(problem['id'])
+        
+        # Format the date
+        updated_at = problem.get('updated_at', '')
+        if updated_at:
+            try:
+                # Try to parse the date string
+                if isinstance(updated_at, str):
+                    updated_at = updated_at.split('.')[0]  # Remove microseconds
+            except:
+                pass
+        
+        print(f"{problem['id']:<5} {problem['name'][:28]:<30} {len(problem['public_tests']):<10} {len(solutions):<10} {updated_at:<20}")
+    
+    print("=" * 80)
+
 def main():
     """Main function."""
     # Set up logging
@@ -132,6 +190,19 @@ def main():
     
     # Parse arguments
     args = parse_arguments()
+    
+    # Initialize database manager
+    db_manager = DatabaseManager(db_path=args.db_path)
+    
+    # Handle database statistics
+    if args.stats:
+        display_stats(db_manager)
+        return 0
+    
+    # Handle recent problems
+    if args.recent is not None:
+        display_recent_problems(db_manager, limit=args.recent)
+        return 0
     
     # Initialize model manager
     model_manager = ModelManager()
@@ -176,13 +247,15 @@ def main():
     print(f"Number of test cases: {test_count}")
     
     # Initialize the problem solver with the specified model
-    solver = SimplifiedSolver(model_id=args.model)
+    solver = SimplifiedSolver(model_id=args.model, db_path=args.db_path)
     
     # Display the model being used
     print(f"\nUsing model: {solver.model}")
     
     # Solve the problem
     print("\nGenerating solution...")
+    print(f"Using solution cache: {'No' if args.no_cache else 'Yes'}")
+    
     start_time = time.time()
     solution = solver.solve_problem(problem)
     end_time = time.time()

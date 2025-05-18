@@ -100,6 +100,7 @@ class GeminiHandler:
     def _map_model_name(self, model_name: str) -> str:
         """
         Maps model names to Gemini model names.
+        Only includes Gemini 2.0 models and above.
         
         Args:
             model_name: The model name
@@ -108,11 +109,9 @@ class GeminiHandler:
             The corresponding Gemini model name
         """
         model_mapping = {
-            "gemini-1.5-pro": "models/gemini-1.5-pro",
-            "gemini-1.5-flash": "models/gemini-1.5-flash",
             "gemini-2.0-pro": "models/gemini-2.0-pro-exp",
             "gemini-2.0-flash": "models/gemini-2.0-flash",
         }
         
         # Use the mapping if available, otherwise use the default model
-        return model_mapping.get(model_name, "models/gemini-1.5-pro")
+        return model_mapping.get(model_name, "models/gemini-2.0-flash")
